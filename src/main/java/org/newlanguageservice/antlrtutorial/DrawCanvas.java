@@ -35,7 +35,7 @@ public class DrawCanvas extends Application {
 		btn.setText("Compile");
 
 		textArea = new StyleClassedTextArea();
-		VirtualizedScrollPane<StyleClassedTextArea> vsPane = new VirtualizedScrollPane<>(textArea);
+		VirtualizedScrollPane vsPane = new VirtualizedScrollPane(textArea);
 
 		textArea.setWrapText(true);
 		//textArea.setStyleClass(from, to, styleClass);
