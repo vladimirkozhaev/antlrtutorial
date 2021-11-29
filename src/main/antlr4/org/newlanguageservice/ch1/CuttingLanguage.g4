@@ -10,7 +10,7 @@ actions
 
 variable_definition
 :
-	VAR variableName = ID COLON type = PRIMITIVE_TYPE
+	VAR variableName = ID COLON type = TYPE
 	((
 		'=' expr = expression
 	)?)
@@ -31,7 +31,7 @@ mul_div_expression
 	((
 		(op = MUL
 		| DIV) expression
-	)*)
+	))
 ;
 
 add_or_sub
@@ -40,14 +40,19 @@ add_or_sub
 	((
 		(op = PLUS
 		| MINUS) expression
-	)*)
+	))
 ;
 
 sub_element
 :
 	brackets_expression
-	| variable_ref|INT
+	| variable_ref|int_val|point
 ;
+
+int_val:INT ;
+
+point: '(' x = INT ',' y = INT ')';
+
 
 brackets_expression
 :
@@ -67,12 +72,12 @@ action
 
 moveTo
 :
-	moveToName = 'MoveTo' '(' x = INT ',' y = INT ')'
+	moveToName = 'MoveTo' point
 ;
 
 lineTo
 :
-	lineToName = 'LineTo' '(' x = INT ',' y = INT ')'
+	lineToName = 'LineTo' point
 ;
 
 EQUAL:'=';
@@ -117,11 +122,12 @@ R_BRACKET
 	')'
 ;
 
-PRIMITIVE_TYPE
+TYPE
 :
 	INT_TYPE
-	| STRING_TYPE
+	| POINT
 ;
+
 ID
 :
 	[_a-zA-Z]
@@ -136,17 +142,14 @@ INT
 	'-'? DIGIT+
 ;
 
+fragment POINT: 'Point';
+
 fragment
 INT_TYPE
 :
 	'int'
 ;
 
-fragment
-STRING_TYPE
-:
-	'string'
-;
 
 fragment
 DIGIT

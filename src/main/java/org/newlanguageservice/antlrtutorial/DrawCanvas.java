@@ -65,8 +65,8 @@ public class DrawCanvas extends Application {
 				lexer.addErrorListener(new CuttingErrorListener());
 				visitor = new CuttingLanguageVisitor(new Point(0, 0), gc);
 				ParseTree tree = parser.actions();
-				Point point = visitor.visit(tree);
-				System.out.println(point);
+				ExprResult result = visitor.visit(tree);
+				System.out.println(result);
 				
 				lexer = new CuttingLanguageLexer(new ANTLRInputStream(textArea.getText()));
 
