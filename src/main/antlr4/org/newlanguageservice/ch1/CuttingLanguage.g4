@@ -11,52 +11,65 @@ actions
 variable_definition
 :
 	VAR variableName = ID COLON type = TYPE
-	((
-		'=' expr = expression
-	)?)
+	(
+		(
+			'=' expr = mul_div_expression
+		)?
+	)
 ;
 
-
-variable_equal:variable_ref EQUAL expr=expression;
-
-
-expression
+variable_equal
 :
-	mul_div_expression
+	variable_ref EQUAL expr = mul_div_expression
 ;
 
 mul_div_expression
 :
 	add_or_sub
-	((
-		(op = MUL
-		| DIV) expression
-	))
+	(
+		(
+			(
+				op = MUL
+				| DIV
+			) mul_div_expression
+		)*
+	)
 ;
 
 add_or_sub
 :
 	sub_element
-	((
-		(op = PLUS
-		| MINUS) expression
-	))
+	(
+		(
+			(
+				op = PLUS
+				| MINUS
+			) mul_div_expression
+		)*
+	)
 ;
 
 sub_element
 :
 	brackets_expression
-	| variable_ref|int_val|point
+	| variable_ref
+	| int_val
+	| point
 ;
 
-int_val:INT ;
+int_val
+:
+	INT
+;
 
-point: '(' x = INT ',' y = INT ')';
-
+point
+:
+	L_BRACKET x = INT ',' y = INT R_BRACKET
+;
 
 brackets_expression
 :
-	L_BRACKET expr = expression R_BRACKET
+	L_BRACKET expr = mul_div_expression R_BRACKET
 ;
 
 variable_ref
@@ -80,7 +93,10 @@ lineTo
 	lineToName = 'LineTo' point
 ;
 
-EQUAL:'=';
+EQUAL
+:
+	'='
+;
 
 DIV
 :
@@ -136,20 +152,22 @@ ID
 	)
 ;
 
-
 INT
 :
 	'-'? DIGIT+
 ;
 
-fragment POINT: 'Point';
+fragment
+POINT
+:
+	'Point'
+;
 
 fragment
 INT_TYPE
 :
 	'int'
 ;
-
 
 fragment
 DIGIT
@@ -159,5 +177,5 @@ DIGIT
 
 WS
 :
-	[ \n\r\t] -> skip
+	[ \n\r\t]+ -> skip
 ; 
