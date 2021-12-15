@@ -1,17 +1,17 @@
 package org.newlanguageservice.antlrtutorial;
 
-import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RuleContext;
 
 public class LanguageException extends RuntimeException {
-	private final ParserRuleContext ctx;
+	private final RuleContext ctx;
 	
-	public LanguageException(ParserRuleContext ctx,String message) {
+	public LanguageException(RuleContext ctx,String message) {
 		super(message);
 		this.ctx = ctx;
 
 	}
 
-	public ParserRuleContext getCtx() {
+	public RuleContext getCtx() {
 		return ctx;
 	}
 

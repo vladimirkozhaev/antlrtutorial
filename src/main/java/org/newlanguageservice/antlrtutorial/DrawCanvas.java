@@ -55,18 +55,10 @@ public class DrawCanvas extends Application {
 			@Override
 			public void handle(ActionEvent event) {
 
-				CuttingLanguageLexer lexer 
-					= new CuttingLanguageLexer(new ANTLRInputStream(textArea.getText()));
-				lexer.removeErrorListeners();
-				CuttingLanguageParser parser
-					= new CuttingLanguageParser(new CommonTokenStream(lexer));
-				parser.removeErrorListeners();
+				CuttingLanguageLexer lexer;
+				CuttingLanguageParser parser;
+				processALanguage(gc,textArea.getText());
 				
-				lexer.addErrorListener(new CuttingErrorListener());
-				visitor = new CuttingLanguageVisitor(new Point(0, 0), gc);
-				ParseTree tree = parser.actions();
-				ExprResult result = visitor.visit(tree);
-				System.out.println(result);
 				
 				lexer = new CuttingLanguageLexer(new ANTLRInputStream(textArea.getText()));
 
@@ -90,6 +82,8 @@ public class DrawCanvas extends Application {
 				
 
 			}
+
+			
 		});
 
 		VBox root = new VBox(btn, vsPane, canvas);
@@ -101,6 +95,23 @@ public class DrawCanvas extends Application {
 
 		primaryStage.show();
 
+	}
+	
+	LanguageResult processALanguage(GraphicsContext gc,String text) {
+		CuttingLanguageLexer lexer 
+			= new CuttingLanguageLexer(new ANTLRInputStream(text));
+		lexer.removeErrorListeners();
+		CuttingLanguageParser parser
+			= new CuttingLanguageParser(new CommonTokenStream(lexer));
+		parser.removeErrorListeners();
+		
+		CuttingErrorListener listener = new CuttingErrorListener();
+		lexer.addErrorListener(listener);
+		parser.addErrorListener(listener);
+		visitor = new CuttingLanguageVisitor(new Point(0, 0), gc);
+		ParseTree tree = parser.actions();
+		ExprResult result = visitor.visit(tree);
+		return new LanguageResult(result, listener.getExceptions());
 	}
 
 	public static void main(String[] args) {

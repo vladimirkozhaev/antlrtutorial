@@ -11,7 +11,6 @@ import org.newlanguageservice.ch1.CuttingLanguageParser.LineToContext;
 import org.newlanguageservice.ch1.CuttingLanguageParser.MoveToContext;
 import org.newlanguageservice.ch1.CuttingLanguageParser.Mul_div_expressionContext;
 import org.newlanguageservice.ch1.CuttingLanguageParser.PointContext;
-import org.newlanguageservice.ch1.CuttingLanguageParser.Sub_elementContext;
 import org.newlanguageservice.ch1.CuttingLanguageParser.Variable_definitionContext;
 import org.newlanguageservice.ch1.CuttingLanguageParser.Variable_equalContext;
 import org.newlanguageservice.ch1.CuttingLanguageParser.Variable_refContext;
@@ -119,7 +118,6 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 
 	}
 
-	
 	@Override
 	public ExprResult visitBrackets_expression(Brackets_expressionContext ctx) {
 		return visit(ctx.expr);
@@ -144,10 +142,12 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 
 		ExprResult pointResult = visit(ctx.point());
 		point = (Point) pointResult.getResult();
+		if (gc != null) {
+			gc.moveTo(point.getX(), point.getY());
 
-		gc.moveTo(point.getX(), point.getY());
+			gc.save();
 
-		gc.save();
+		}
 		return new ExprResult(Type.POINT, point);
 	}
 
@@ -157,9 +157,10 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 		int x = point.getX();
 		int y = point.getY();
 		point = (Point) pointResult.getResult();
-
-		gc.strokeLine(x, y, point.getX(), point.getY());
-		gc.save();
+		if (gc != null) {
+			gc.strokeLine(x, y, point.getX(), point.getY());
+			gc.save();
+		}
 		return new ExprResult(Type.POINT, point);
 	}
 }
