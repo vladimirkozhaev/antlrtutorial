@@ -1,5 +1,10 @@
 grammar CuttingLanguage;
 
+point
+:
+	L_BRACKET x = mul_div_expression ',' y = mul_div_expression R_BRACKET
+;
+
 actions
 :
 	(
@@ -32,7 +37,7 @@ mul_div_expression
 				op = MUL
 				| DIV
 			) mul_div_expression
-		)*
+		)?
 	)
 ;
 
@@ -45,7 +50,7 @@ add_or_sub
 				op = PLUS
 				| MINUS
 			) mul_div_expression
-		)*
+		)?
 	)
 ;
 
@@ -62,10 +67,6 @@ int_val
 	INT
 ;
 
-point
-:
-	L_BRACKET x = INT ',' y = INT R_BRACKET
-;
 
 brackets_expression
 :

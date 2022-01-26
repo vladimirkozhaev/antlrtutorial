@@ -35,8 +35,8 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 
 	@Override
 	public ExprResult visitPoint(PointContext ctx) {
-		int x = Integer.parseInt(ctx.x.getText());
-		int y = Integer.parseInt(ctx.y.getText());
+		Integer x = (Integer) visit(ctx.x).getResult();
+		Integer y = (Integer) visit(ctx.y).getResult();
 
 		return new ExprResult(Type.POINT, new Point(x, y));
 	}
@@ -55,6 +55,7 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 			}
 			variable.setValue(def);
 		}
+		variables.put(variable.getName(), variable);
 		return new ExprResult(Type.VOID, null);
 	}
 
@@ -65,6 +66,7 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 			throw new LanguageException(ctx, "variable " + variableName + " is not yet defined");
 		}
 		Variable variable = variables.get(variableName);
+		variables.put(variableName, variable);
 		ExprResult result = visit(ctx.expr);
 		if (result.getType() != variable.getType()) {
 
@@ -79,15 +81,20 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 	public ExprResult visitMul_div_expression(Mul_div_expressionContext ctx) {
 		ExprResult left = visit(ctx.add_or_sub());
 
-		ExprResult right = visit(ctx.expression());
+		if (ctx.mul_div_expression() != null) {
+			ExprResult right = visit(ctx.mul_div_expression());
 
-		if (left.getType() != Type.NUMBER || right.getType() != Type.NUMBER) {
-			throw new LanguageException(ctx, "Type " + left + " is not correspond with an expression type " + right);
+			if (left.getType() != Type.NUMBER || right.getType() != Type.NUMBER) {
+				throw new LanguageException(ctx,
+						"Type " + left + " is not correspond with an expression type " + right);
+			}
+
+			return ctx.op.getText().equals("*")
+					? new ExprResult(Type.NUMBER, (Integer) left.getResult() * (Integer) left.getResult())
+					: new ExprResult(Type.NUMBER, (Integer) left.getResult() / (Integer) left.getResult());
+
 		}
-
-		return ctx.op.getText().equals("*")
-				? new ExprResult(Type.NUMBER, (Integer) left.getResult() * (Integer) left.getResult())
-				: new ExprResult(Type.NUMBER, (Integer) left.getResult() / (Integer) left.getResult());
+		return left;
 
 	}
 
@@ -95,27 +102,29 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 	public ExprResult visitAdd_or_sub(Add_or_subContext ctx) {
 
 		ExprResult left = visit(ctx.sub_element());
+		if (ctx.mul_div_expression() != null) {
+			ExprResult right = visit(ctx.mul_div_expression());
 
-		ExprResult right = visit(ctx.expression());
+			if (left.getType() != right.getType()) {
+				throw new LanguageException(ctx,
+						"Type " + left + " is not correspond with an expression type " + right);
+			}
 
-		if (left.getType() != right.getType()) {
-			throw new LanguageException(ctx, "Type " + left + " is not correspond with an expression type " + right);
-		}
+			boolean isPlus = ctx.op.getText().equals("+");
+			if (left.getType() == Type.NUMBER) {
+				return isPlus ? new ExprResult(Type.NUMBER, (Integer) left.getResult() + (Integer) left.getResult())
+						: new ExprResult(Type.NUMBER, (Integer) left.getResult() - (Integer) left.getResult());
 
-		boolean isPlus = ctx.op.getText().equals("+");
-		if (left.getType() == Type.NUMBER) {
-			return isPlus ? new ExprResult(Type.NUMBER, (Integer) left.getResult() + (Integer) left.getResult())
-					: new ExprResult(Type.NUMBER, (Integer) left.getResult() - (Integer) left.getResult());
+			}
 
-		}
+			Point leftResult = (Point) left.getResult();
+			Point rightResult = (Point) right.getResult();
 
-		Point leftResult = (Point) left.getResult();
-		Point rightResult = (Point) right.getResult();
-
-		return new ExprResult(Type.POINT,
-				isPlus ? new Point(leftResult.getX() + rightResult.getX(), leftResult.getY() + rightResult.getY())
-						: new Point(leftResult.getX() - rightResult.getX(), leftResult.getY() - rightResult.getY()));
-
+			return new ExprResult(Type.POINT, isPlus
+					? new Point(leftResult.getX() + rightResult.getX(), leftResult.getY() + rightResult.getY())
+					: new Point(leftResult.getX() - rightResult.getX(), leftResult.getY() - rightResult.getY()));
+		} else
+			return left;
 	}
 
 	@Override
@@ -134,7 +143,7 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 			throw new LanguageException(ctx, "variable with name " + ctx.getText() + " is not instantiated");
 		}
 
-		return new ExprResult(variable.getType(), variable.getValue());
+		return new ExprResult(variable.getType(), ((ExprResult)variable.getValue()).getResult());
 	}
 
 	@Override
