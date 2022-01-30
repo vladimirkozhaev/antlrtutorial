@@ -149,8 +149,11 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 	@Override
 	public ExprResult visitMoveTo(MoveToContext ctx) {
 
-		ExprResult pointResult = visit(ctx.point());
-		point = (Point) pointResult.getResult();
+		ExprResult exprResult = visit(ctx.expr);
+		Point point = getPointFromExprResult(exprResult);
+		
+		
+		
 		if (gc != null) {
 			gc.moveTo(point.getX(), point.getY());
 
@@ -160,16 +163,28 @@ public class CuttingLanguageVisitor extends CuttingLanguageBaseVisitor<ExprResul
 		return new ExprResult(Type.POINT, point);
 	}
 
+	private Point getPointFromExprResult(ExprResult exprResult) {
+		Point point;
+		if ( exprResult.getType()==Type.POINT) {
+			point=(Point) exprResult.getResult();
+			
+		}else 
+			throw new IllegalArgumentException("Unexpected value: " + exprResult.getType());
+		return point;
+	}
+
 	@Override
 	public ExprResult visitLineTo(LineToContext ctx) {
-		ExprResult pointResult = visit(ctx.point());
+		ExprResult pointResult = visit(ctx.expr);
+		Point newPoint=getPointFromExprResult(pointResult);
 		int x = point.getX();
 		int y = point.getY();
-		point = (Point) pointResult.getResult();
+		
 		if (gc != null) {
-			gc.strokeLine(x, y, point.getX(), point.getY());
+			gc.strokeLine(x, y, newPoint.getX(), newPoint.getY());
 			gc.save();
 		}
-		return new ExprResult(Type.POINT, point);
+		point=newPoint;
+		return new ExprResult(Type.POINT, newPoint);
 	}
 }

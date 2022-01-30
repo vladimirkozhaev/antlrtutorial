@@ -86,12 +86,12 @@ action
 
 moveTo
 :
-	moveToName = 'MoveTo' point
+	moveToName = 'MoveTo' expr=mul_div_expression
 ;
 
 lineTo
 :
-	lineToName = 'LineTo' point
+	lineToName = 'LineTo' expr=mul_div_expression
 ;
 
 EQUAL

@@ -24,6 +24,10 @@ public class GrammarTests {
 	public void testSimplePointEquation() {
 		assertEquals(0, new DrawCanvas().processALanguage(null, "var x:Point = (1,1) +(2,2)").getExceptions().size());
 	}
+	@Test
+	public void testExpressionAsPointArgument() {
+		assertEquals(0, new DrawCanvas().processALanguage(null, "var x:Point = (1+2*3,1)").getExceptions().size());
+	}
 
 	@Test(expected = LanguageException.class)
 	public void testAnExceptionInPointEquation() {
